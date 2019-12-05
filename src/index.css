@@ -5,6 +5,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 100vw;
+  height: 100vh;
+  background: #333;
+  font-size: 12px;
+}
+
+button {
+  outline: none;
 }
 
 code {
