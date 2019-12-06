@@ -2,11 +2,11 @@ export const abiSchema = [
   {
     "constant": true,
     "inputs": [],
-    "name": "getBalance",
+    "name": "get_participants",
     "outputs": [
       {
         "name": "",
-        "type": "uint256"
+        "type": "address[]"
       }
     ],
     "payable": false,
@@ -15,13 +15,22 @@ export const abiSchema = [
   },
   {
     "constant": false,
+    "inputs": [],
+    "name": "shuffle",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
-        "name": "new_user",
-        "type": "address"
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "tranfer",
+    "name": "participants_address",
     "outputs": [
       {
         "name": "",
@@ -29,19 +38,51 @@ export const abiSchema = [
       }
     ],
     "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "announce",
+    "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "constant": false,
     "inputs": [],
-    "name": "withdraw",
-    "outputs": [
+    "name": "reopen",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
       {
-        "name": "",
-        "type": "uint256"
+        "name": "data",
+        "type": "address[]"
       }
     ],
+    "name": "join",
+    "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
@@ -49,11 +90,11 @@ export const abiSchema = [
   {
     "constant": true,
     "inputs": [],
-    "name": "getTax",
+    "name": "signups_open",
     "outputs": [
       {
         "name": "",
-        "type": "uint256"
+        "type": "bool"
       }
     ],
     "payable": false,
@@ -64,28 +105,14 @@ export const abiSchema = [
     "constant": false,
     "inputs": [
       {
-        "name": "total_days",
-        "type": "uint256"
+        "name": "avoid",
+        "type": "address"
       }
     ],
-    "name": "deposit",
+    "name": "Cheating",
     "outputs": [],
     "payable": true,
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "getDaysRemaining",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -93,5 +120,34 @@ export const abiSchema = [
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "participant",
+        "type": "address"
+      }
+    ],
+    "name": "Joined",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "santa",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "to",
+        "type": "address"
+      }
+    ],
+    "name": "Assigned",
+    "type": "event"
   }
 ]

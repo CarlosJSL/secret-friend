@@ -4,13 +4,17 @@ import spinner from '../assets/loading.svg';
 import './Home.css';
 
 const Web3 = require('web3');
+const contractHash = '0x00a00a5cadc7ed1f40b778ea7129269eea4f60e1';
+const myWalletHash = '0x8d46Fa0ecAf7DE3E3d7E09dcc0153040F061FBDB';
 
 function Home() {
-  const [state, setState] = useState({
-    disableButton: false,
+  let initialState = {
     fieldsNumber: [],
     loading: false,
-  });
+    contract: {},
+    showModal: false,
+  };
+  const [state, setState] = useState(initialState);
 
   useEffect(() => {
     loadMetaMask();
@@ -37,18 +41,30 @@ function Home() {
     }
 
     let web3 = new Web3(web3Provider);
-    let contract = new web3.eth.Contract(abiSchema, '0x5C608BB56d94371d7eE5BAFf5ECe967D68613AEe');
-    doTransaction(contract);
+    let contract = new web3.eth.Contract(abiSchema, contractHash);
+    contract.events.allEvents({ fromBlock: 'latest' }, function (error, result) {
+
+      console.log('sorteio realizado')
+      console.log(result)
+      setState({
+        ...state,
+        announce: result,
+      })
+    });
+
+    setState({
+      ...state,
+      contract
+    })
   }
 
-  async function doTransaction(contract) {
-    // const transaction = await contract.methods.getBalance().send({
-    //   from: '0x8d46Fa0ecAf7DE3E3d7E09dcc0153040F061FBDB',
-    //   value: 1,
-    // })
-    // console.log(transaction)
-    // const response = await contract.methods.getBalance().call({ from: '0x8d46Fa0ecAf7DE3E3d7E09dcc0153040F061FBDB' })
+  function openModal() {
+    setState({
+      ...state,
+      showModal: true,
+    })
   }
+
 
   function newDraw() {
     setState({ ...state, disableButton: true });
@@ -56,6 +72,7 @@ function Home() {
 
   function createFields(e) {
     setState({
+      ...state,
       disableButton: state.disableButton,
       fieldsNumber: e.target.value ? Array(parseInt(e.target.value)).fill().map(() => Math.round(Math.random() * parseInt(e.target.value))) : []
     })
@@ -70,7 +87,7 @@ function Home() {
     });
   }
 
-  function createDraw() {
+  async function createDraw() {
     let wallets = [];
 
     Object.entries(state).forEach((entry) => {
@@ -78,10 +95,61 @@ function Home() {
         wallets.push(entry[1])
       }
     })
-    // setState({
-    //   ...state,
-    //   loading: true,
-    // })
+    setState({
+      ...state,
+      loading: true,
+    })
+
+    try {
+
+      await state.contract.methods.join(wallets).send({
+        from: myWalletHash,
+      })
+      setState(initialState)
+    } catch (error) {
+      setState({
+        ...state,
+        loading: false,
+      })
+      console.log(error)
+    }
+
+  }
+
+  async function announce() {
+    const announce = await state.contract.methods.annnounce().call({
+      from: myWalletHash,
+    });
+  }
+
+  async function cheat() {
+    setState({
+      ...state,
+      loading: true,
+    })
+
+    try {
+      await state.contract.methods.Cheating(
+        state.cheatFrom,
+        state.cheatTo,
+        state.cheatValue
+      ).call({
+        from: myWalletHash,
+      });
+
+      setState(initialState)
+    } catch (error) {
+      console.log(error)
+      setState(initialState)
+    }
+  }
+
+
+  async function inputHandler(e, inputName) {
+    setState({
+      ...state,
+      [inputName]: e.target.value,
+    })
   }
 
   return (
@@ -89,8 +157,11 @@ function Home() {
       <button className="button" onClick={newDraw} style={{ display: state.disableButton ? 'none' : 'flex' }}>
         <p className="button__text">Novo sorteio</p>
       </button>
-      <button className="button" style={{ display: state.disableButton ? 'none' : 'flex' }}>
-        <p className="button__text">Verificar meus sorteios</p>
+      <button className="button" onClick={announce} style={{ display: state.disableButton ? 'none' : 'flex' }}>
+        <p className="button__text">Sortear</p>
+      </button>
+      <button className="button" onClick={openModal} style={{ display: state.disableButton ? 'none' : 'flex' }}>
+        <p className="button__text">Roubar</p>
       </button>
       <div className="new-draw" style={{ display: state.disableButton ? 'flex' : 'none' }}>
         <label className="form-input__text">Quantidade de participantes</label>
@@ -109,6 +180,34 @@ function Home() {
             state.loading ? <img src={spinner} alt="" style={{ width: '30px' }} /> : 'Criar sorteio'
           }
         </button>
+        <button className="button__create-draw" onClick={() => setState(initialState)} >
+          Voltar
+        </button>
+      </div>
+      <div className="modalWrapper" style={{ display: state.showModal ? 'flex' : 'none' }}>
+        <div className="modal">
+          <p className="close-icon" onClick={() => setState(initialState)}>X</p>
+          <div className="form-box" style={{ alignSelf: 'center' }}>
+            <label className="form-input__text"> Número da carteira de origem</label>
+            <input name="cheatFrom" onChange={(e) => inputHandler(e, 'cheatFrom')} className="form-input__participants" type="text" />
+          </div>
+          <div className="form-box" style={{ alignSelf: 'center' }}>
+            <label className="form-input__text"> Número da carteira de destino</label>
+            <input name="cheatTo" onChange={(e) => inputHandler(e, 'cheatTo')} className="form-input__participants" type="text" />
+          </div>
+          <div className="form-box" style={{ alignSelf: 'center' }}>
+            <label className="form-input__text"> Valor</label>
+            <input name="cheatValue" onChange={(e) => inputHandler(e, 'cheatValue')} className="form-input__participants" type="number " />
+          </div>
+          <button style={{ alignSelf: 'center', background: 'black', width: '50%' }} className="button__create-draw" onClick={cheat} >
+            {
+              state.loading ? <img src={spinner} alt="" style={{ width: '30px' }} /> : 'Roubar'
+            }
+          </button>
+        </div>
+      </div>
+      <div className="result-box">
+
       </div>
     </div>
   );
