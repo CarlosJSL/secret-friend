@@ -4,7 +4,7 @@ import spinner from '../assets/loading.svg';
 import './Home.css';
 
 const Web3 = require('web3');
-const contractHash = '0x00a00a5cadc7ed1f40b778ea7129269eea4f60e1';
+const contractHash = '0xd4ee305140b354b65b8fb6613d07cc9faaddb6f0';
 const myWalletHash = '0x8d46Fa0ecAf7DE3E3d7E09dcc0153040F061FBDB';
 
 function Home() {
@@ -43,13 +43,15 @@ function Home() {
     let web3 = new Web3(web3Provider);
     let contract = new web3.eth.Contract(abiSchema, contractHash);
     contract.events.allEvents({ fromBlock: 'latest' }, function (error, result) {
-
-      console.log('sorteio realizado')
+      console.log('evento disparado')
       console.log(result)
-      setState({
-        ...state,
-        announce: result,
-      })
+      if (result.event === "Assigned") {
+
+        setState({
+          ...state,
+          announce: result.returnValues,
+        })
+      }
     });
 
     setState({
@@ -117,9 +119,25 @@ function Home() {
   }
 
   async function announce() {
-    const announce = await state.contract.methods.annnounce().call({
-      from: myWalletHash,
-    });
+    setState({
+      ...state,
+      loading: true,
+    })
+    try {
+      await state.contract.methods.announce().send({
+        from: myWalletHash,
+      });
+      setState({
+        ...state,
+        loading: false,
+      })
+    } catch (error) {
+      console.log(error)
+      setState({
+        ...state,
+        loading: false,
+      })
+    }
   }
 
   async function cheat() {
@@ -133,7 +151,7 @@ function Home() {
         state.cheatFrom,
         state.cheatTo,
         state.cheatValue
-      ).call({
+      ).send({
         from: myWalletHash,
       });
 
@@ -158,7 +176,9 @@ function Home() {
         <p className="button__text">Novo sorteio</p>
       </button>
       <button className="button" onClick={announce} style={{ display: state.disableButton ? 'none' : 'flex' }}>
-        <p className="button__text">Sortear</p>
+        {
+          state.loading ? <img src={spinner} alt="" style={{ width: '30px' }} /> : <p className="button__text">Sortear</p>
+        }
       </button>
       <button className="button" onClick={openModal} style={{ display: state.disableButton ? 'none' : 'flex' }}>
         <p className="button__text">Roubar</p>
